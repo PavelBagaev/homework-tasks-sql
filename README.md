@@ -1,1 +1,1 @@
-# homework-tasks-sql
+Здесь находится 2 задание по SQL
