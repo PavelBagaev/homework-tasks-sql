@@ -13,27 +13,23 @@ WITH FirstOrder AS (
   FROM Sales.SalesOrderHeader
   GROUP BY CustomerID
 )
-SELECT fo.FirstOrderDate, person.LastName, person.FirstName,
+SELECT FO.FirstOrderDate, person.LastName, person.FirstName,
        STUFF((
-           SELECT CONCAT(' ', product.Name, ' Quantity: ', sod.OrderQty, ' item(s)', CHAR(13) + CHAR(10))
-           FROM Sales.SalesOrderHeader AS soh
-           JOIN Sales.SalesOrderDetail AS sod
-		   ON soh.SalesOrderID = sod.SalesOrderID
+           SELECT CONCAT(' ', product.Name, ' Quantity: ', SOD.OrderQty, ' item(s)', CHAR(13) + CHAR(10))
+           FROM Sales.SalesOrderHeader AS SOH
+           JOIN Sales.SalesOrderDetail AS SOD
+		   ON SOH.SalesOrderID = SOD.SalesOrderID
            JOIN Production.Product AS product
-		   ON sod.ProductID = product.ProductID
-           WHERE soh.CustomerID = fo.CustomerID AND soh.OrderDate = fo.FirstOrderDate
+		   ON SOD.ProductID = product.ProductID
+           WHERE SOH.CustomerID = FO.CustomerID AND SOH.OrderDate = FO.FirstOrderDate
            FOR XML PATH(''), TYPE
-       ).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS OrderContents
-FROM FirstOrder AS fo
-JOIN Sales.SalesOrderHeader AS soh
-ON fo.CustomerID = soh.CustomerID AND fo.FirstOrderDate = soh.OrderDate
-JOIN Sales.SalesOrderDetail AS sod
-ON soh.SalesOrderID = sod.SalesOrderID
-JOIN Production.Product AS product
-ON sod.ProductID = product.ProductID
+       ).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS 'Order contents'
+FROM FirstOrder AS FO
+JOIN Sales.Customer AS customer
+ON FO.CustomerID = customer.CustomerID
 JOIN Person.Person AS person
-ON fo.CustomerID = person.BusinessEntityID
-ORDER BY fo.FirstOrderDate DESC;
+ON customer.PersonID = person.BusinessEntityID
+ORDER BY FO.FirstOrderDate DESC;
 
 
 
