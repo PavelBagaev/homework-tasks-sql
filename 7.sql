@@ -15,18 +15,13 @@ CREATE PROCEDURE SingleMales (
 AS
 	BEGIN
 		--собираем в #TemporaryTable все записи холостых мужчин родившихся с  @DateFrom по @DateTo
-		SELECT *
-		INTO #TemporaryTable
-		FROM HumanResources.Employee
-		WHERE MaritalStatus = 'S' AND Gender = 'M' AND (BirthDate BETWEEN @DateFrom AND @DateTo)
-		ORDER BY BirthDate DESC; 
-
-		--заносим в переменную @RecordCount количество записей
-		SELECT @RecordCount = COUNT(*)
-		FROM #TemporaryTable;
-
-		--сносим временную таблицу
-		DROP TABLE #TemporaryTable;
+		WITH SM AS (
+			SELECT *
+			FROM HumanResources.Employee
+			WHERE MaritalStatus = 'S' AND Gender = 'M' AND (BirthDate BETWEEN @DateFrom AND @DateTo)
+			)
+			SELECT @RecordCount = COUNT(*)
+			FROM SM;
 	END   
 GO
 
@@ -34,7 +29,7 @@ GO
 --вызываем процедуру и получаем количество записей
 DECLARE @Count INT 
 EXEC SingleMales '19500101', '19800101', @Count OUTPUT;
-SELECT @Count AS NumberOfRecords
+SELECT @Count AS 'Number of records' 
 
 --сносим процедуру по необходимости :)
 DROP PROCEDURE SingleMales
