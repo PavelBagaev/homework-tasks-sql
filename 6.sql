@@ -6,29 +6,26 @@
 --Упорядочить по иерархии от директора вниз к рядовым сотрудникам
 --Внутри одного уровня иерархии упорядочить по фамилии руководителя, затем по фамилии сотрудника
 
-WITH Employees (FullNameOfSubordinate,
-				HireDateOfSubordinate,
-				BirthDateOfSubordinate,
-				OrganizationNodeOfSubordinate) AS (
-	SELECT CONCAT(Person.LastName, ' ', SUBSTRING(Person.FirstName, 1, 1), '.', SUBSTRING(Person.MiddleName, 1, 1), '.', ' ') AS FullNameOfSupervisor,
-		   Subordinate.HireDate AS HireDateOfSupervisor,
-	       Subordinate.BirthDate AS BirthDateOfSupervisor,
-	       Subordinate.OrganizationNode
-	FROM HumanResources.Employee AS Subordinate
-	JOIN Person.Person AS Person
-		ON Person.BusinessEntityID = Subordinate.BusinessEntityID
+WITH Employees AS (
+	SELECT CONCAT(Person.LastName, ' ', SUBSTRING(Person.FirstName, 1, 1), '.', SUBSTRING(Person.MiddleName, 1, 1), '.', ' ') AS 'Full name of supervisor',
+		   supervisor.HireDate AS 'Hire date of supervisor',
+	       supervisor.BirthDate AS 'Birth date of supervisor',
+	       supervisor.OrganizationNode,
+		   supervisor.OrganizationLevel
+	FROM HumanResources.Employee AS supervisor
+	JOIN Person.Person AS person
+		ON person.BusinessEntityID = supervisor.BusinessEntityID
 )
-select CONCAT(Person.LastName, ' ', SUBSTRING(Person.FirstName, 1, 1), '.', SUBSTRING(Person.MiddleName, 1, 1), '.', ' ') AS FullNameOfSupervisor,
-	   Supervisor.HireDate AS HireDateOfSupervisor,
-	   Supervisor.BirthDate AS BirthDateOfSupervisor,
-	   EH.FullNameOfSubordinate,
-	   EH.HireDateOfSubordinate,
-	   EH.BirthDateOfSubordinate
-FROM HumanResources.Employee AS Supervisor
-JOIN Person.Person AS Person
-	ON Person.BusinessEntityID = Supervisor.BusinessEntityID
-JOIN Employees AS EH
-	ON EH.OrganizationNodeOfSubordinate.GetAncestor(1) = Supervisor.OrganizationNode OR Supervisor.OrganizationNode IS NULL
-WHERE Supervisor.BirthDate > EH.BirthDateOfSubordinate AND Supervisor.HireDate > EH.HireDateOfSubordinate
-ORDER BY Supervisor.OrganizationLevel, EH.OrganizationNodeOfSubordinate, FullNameOfSupervisor, EH.FullNameOfSubordinate;
-GO
+select supervisor.[Full name of supervisor],
+	   supervisor.[Hire date of supervisor],
+	   supervisor.[Birth date of supervisor],
+	   CONCAT(person.LastName, ' ', SUBSTRING(person.FirstName, 1, 1), '.', SUBSTRING(person.MiddleName, 1, 1), '.', ' ') AS 'Full name of subordinate',
+	   subordinate.HireDate AS 'Hire date of subordinate',
+	   subordinate.BirthDate AS 'Birth date of subordinate'
+FROM Employees AS supervisor
+JOIN HumanResources.Employee AS subordinate
+ON subordinate.OrganizationNode.GetAncestor(1) = supervisor.OrganizationNode
+JOIN Person.Person AS person
+ON person.BusinessEntityID = subordinate.BusinessEntityID
+WHERE supervisor.[Birth date of supervisor] > subordinate.BirthDate AND supervisor.[Hire date of supervisor] > subordinate.HireDate
+ORDER BY supervisor.OrganizationLevel, [Full name of supervisor], [Full name of subordinate];
