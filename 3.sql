@@ -4,14 +4,16 @@
 --Приоритет определяется как количество покупателей в городе
 --В городе не должно быть магазина
 
-SELECT TOP 10 
-City, COUNT(CustomerID) AS 'Priority'
-FROM Sales.SalesOrderHeader AS soh
+SELECT TOP 10
+City, COUNT(CustomerID) AS Priotiry
+FROM Sales.Customer AS customer
+JOIN Person.BusinessEntityAddress AS BEA
+ON customer.PersonID = BEA.BusinessEntityID
 JOIN Person.Address AS address
-ON soh.ShipToAddressID = address.AddressID
+ON BEA.AddressID = address.AddressID
 WHERE City NOT IN (
 	SELECT City
 	FROM Sales.vStoreWithAddresses
-	)
+)
 GROUP BY City
-ORDER BY [Priority] DESC;
+ORDER BY Priotiry DESC;
