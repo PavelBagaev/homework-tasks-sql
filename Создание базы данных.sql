@@ -11,19 +11,20 @@ CREATE TABLE Customer (
 	Gender nchar(1) NOT NULL,
 	Address nvarchar(100) NOT NULL,
 	City nvarchar(40) NOT NULL,
-	CHECK (Gender = 'Ì' OR Gender = 'Æ')
+	CHECK (Gender = 'Ðœ' OR Gender = 'Ð–')
 );
 
 CREATE TABLE Product (
 	ProductID int IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	Name varchar(100) NOT NULL,
 	Price money NOT NULL,
-	MesurementType nvarchar(10) NOT NULL,
+	MesurementType nvarchar(10) NOT NULL
 );
 
 CREATE TABLE OrderHeader (
 	OrderID int IDENTITY (1,1) NOT NULL PRIMARY KEY,
 	CustomerID int FOREIGN KEY REFERENCES Customer(CustomerID),
+	OrderDate date NOT NULL
 );
 
 CREATE TABLE OrderDetail (
@@ -32,6 +33,5 @@ CREATE TABLE OrderDetail (
 	ProductID int FOREIGN KEY REFERENCES Product(ProductID),
 	OrderQty smallint NOT NULL,
 	Price money NOT NULL,
-	TotalCost AS (OrderQty * Price) PERSISTED,
-	OrderDate date NOT NULL
+	TotalCost AS (OrderQty * Price) PERSISTED
 );
