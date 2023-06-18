@@ -1,4 +1,4 @@
---Задание 4: новые индексы
+--New indices for the fourth task
 CREATE INDEX NewCoolIndex1 ON Marketing.Product (ProductID)
 INCLUDE (ProductModelID, SubcategoryID);
 
