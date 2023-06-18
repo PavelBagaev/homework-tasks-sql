@@ -1,4 +1,4 @@
---Задание 3: новые индексы
+--New indices for the third task
 CREATE INDEX NewCoolIndex1 ON Marketing.Prospect (LastName)
 INCLUDE (FirstName);
 
